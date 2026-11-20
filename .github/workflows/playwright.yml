@@ -1,0 +1,33 @@
+name: Playwright tests
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          # Node.js 26 is the version the suite is proven green on (my laptop runs v26.13.1); package.json allows >=22.13, but we only tested 26.
+          node-version: 26
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the Playwright tests
+        run: npx playwright test
+
+      - name: Keep the HTML report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: playwright-report/
